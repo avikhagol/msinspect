@@ -68,6 +68,9 @@ def ms_summary(ms_path):
             summary["npol_setup"] = pol.nrows()
 
             if "CORR_TYPE" in pol.colnames():
-                summary["corr_types"] = pol.getcol("CORR_TYPE")
+                summary["corr_types"] = [
+                    list(pol.getcell("CORR_TYPE", i))
+                    for i in range(pol.nrows())
+                ]
 
     return summary
