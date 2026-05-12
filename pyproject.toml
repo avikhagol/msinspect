@@ -9,7 +9,7 @@ description = "Inspect Measurement Sets gracefully"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    "python-casacore", "rich", "textual"
+    "python-casacore", "rich", "textual", "pypdf"
 ]
 
 [project.scripts]
