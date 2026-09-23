@@ -25,13 +25,21 @@ class MSApp(App):
     }
     """
 
-    def __init__(self, vis, *, read=False, read_rows=20, table_name="MAIN"):
+    def __init__(
+        self,
+        vis,
+        *,
+        read=False,
+        read_rows=20,
+        table_name="MAIN",
+        start_row=0,
+    ):
         super().__init__()
         self.vis = vis
         self.read = read
         self.read_rows = read_rows
         self.selected_table = table_name
-        self.start_row = 0
+        self.start_row = max(0, start_row)
 
     def _table_path(self, name):
         if name == "MAIN":
@@ -90,6 +98,9 @@ class MSApp(App):
 
     def on_select_changed(self, event):
         if event.value == Select.BLANK:
+            return
+
+        if event.value == self.selected_table:
             return
 
         self.selected_table = event.value

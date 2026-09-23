@@ -22,6 +22,14 @@ def _positive_int(value: str) -> int:
     return parsed
 
 
+def _non_negative_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 0:
+        raise argparse.ArgumentTypeError("must be zero or greater")
+
+    return parsed
+
+
 def _render_summary(
     vis: str,
     *,
@@ -30,6 +38,7 @@ def _render_summary(
     tui: bool,
     read_table: str | None,
     read_rows: int,
+    start_row: int = 0,
 ) -> int:
     if tui:
         from msinspect.tui import MSApp
@@ -39,13 +48,22 @@ def _render_summary(
             read=read_table is not None,
             read_rows=read_rows,
             table_name=read_table or "MAIN",
+            start_row=start_row,
         ).run()
         return 0
 
     console = Console(record=True)
     if read_table is not None:
         table_path = vis if read_table == "MAIN" else str(Path(vis) / read_table)
-        console.print(render_ms_table(read_ms_table(table_path, max_rows=read_rows)))
+        console.print(
+            render_ms_table(
+                read_ms_table(
+                    table_path,
+                    max_rows=read_rows,
+                    start_row=start_row,
+                )
+            )
+        )
     else:
         summary = ms_summary(vis)
         renderer = render_main_summary if mini else render_summary
@@ -92,6 +110,12 @@ def _summary_parser(prog: str) -> argparse.ArgumentParser:
         default=20,
         help="Maximum rows to render with --read.",
     )
+    parser.add_argument(
+        "--start-row",
+        type=_non_negative_int,
+        default=0,
+        help="Zero-based first row to render with --read.",
+    )
     return parser
 
 
@@ -127,6 +151,12 @@ def _legacy_parser() -> argparse.ArgumentParser:
         default=20,
         help="Maximum rows to render with --read.",
     )
+    parser.add_argument(
+        "--start-row",
+        type=_non_negative_int,
+        default=0,
+        help="Zero-based first row to render with --read.",
+    )
 
     return parser
 
@@ -148,6 +178,7 @@ def cli(argv: Optional[list[str]] = None) -> int:
             tui=args.tui,
             read_table=args.read,
             read_rows=args.read_rows,
+            start_row=args.start_row,
         )
 
     if len(argv) >= 2 and argv[1] in PLOT_MODES:
@@ -167,6 +198,7 @@ def cli(argv: Optional[list[str]] = None) -> int:
         tui=args.tui,
         read_table=args.read,
         read_rows=args.read_rows,
+        start_row=args.start_row,
     )
 
 
